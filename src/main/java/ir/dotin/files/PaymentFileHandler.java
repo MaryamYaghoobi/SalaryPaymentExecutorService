@@ -28,7 +28,6 @@ public class PaymentFileHandler {
         writePaymentRecordsToFile(paymentVOs);
         printPaymentVOsToConsole(paymentVOs);
         return paymentVOs;
-
     }
 
     public static void printPaymentVOsToConsole(List<PaymentVO> paymentVOs) {
