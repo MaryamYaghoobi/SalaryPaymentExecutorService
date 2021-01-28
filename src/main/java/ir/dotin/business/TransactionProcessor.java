@@ -17,7 +17,6 @@ public class TransactionProcessor {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         List<TransactionVO> transactionVOs = new ArrayList<>();
         BalanceFileHandler.createFinalBalanceFile(depositBalances);
-       // TransactionFileHandler.createTransactionFile(transactionVOs,depositBalances);
         String debtorDepositNumber = getDebtorDepositNumber(paymentVOs);
         validationWithdrawals(depositBalances, paymentVOs, debtorDepositNumber);
         for (PaymentVO paymentVO : paymentVOs) {

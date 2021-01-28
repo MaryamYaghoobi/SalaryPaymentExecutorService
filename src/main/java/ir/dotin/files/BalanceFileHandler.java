@@ -16,13 +16,12 @@ public class BalanceFileHandler {
 
 
     public static List<BalanceVO> createInitialBalanceFile(List<BalanceVO> balanceVOs) throws IOException {
-//--------------------------------------------------------------------------
         //To Test Transaction Processor
         String input1 = "10099999999900000";
         BigDecimal b = new BigDecimal(input1);
         BigDecimal a = PaymentTransactionApp.generateRandomAmount().add(b);
         balanceVOs.add(new BalanceVO(PaymentTransactionApp.DEBTOR_DEPOSIT_NUMBER, a));
-//---------------------------------------------------------------------------
+        //To Test InadequateInitialBalanceException
         // balanceVOs.add(new BalanceVO(PaymentTransactionApp.DEBTOR_DEPOSIT_NUMBER, PaymentTransactionApp.generateRandomAmount()));
         for (int i = 1; i <= 1000; i++) {
             balanceVOs.add(new BalanceVO(PaymentTransactionApp.CREDITOR_DEPOSIT_NUMBER_PREFIX + i, PaymentTransactionApp.generateRandomAmount()));
@@ -31,7 +30,6 @@ public class BalanceFileHandler {
         printBalanceVOsToConsole(balanceVOs);
         return balanceVOs;
     }
-    //----------------------------------------------------------------
     public static void writeBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
         PrintWriter printWriter = new PrintWriter(PaymentTransactionApp.BALANCE_FILE_PATH);
         for (BalanceVO balanceVO : balanceVOs) {
@@ -49,7 +47,6 @@ public class BalanceFileHandler {
     }
 
 
-
     public static String createFinalBalanceFile(List<BalanceVO> depositBalances)
             throws IOException {
         String resultFinalBalance = "";
@@ -61,7 +58,7 @@ public class BalanceFileHandler {
         return resultFinalBalance;
     }
 
-    public static synchronized void  writeFinalBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
+    public static synchronized void writeFinalBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
         PrintWriter printWriter = new PrintWriter(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH);
         for (BalanceVO balanceVO : balanceVOs) {
             printWriter.println(balanceVO.toString());

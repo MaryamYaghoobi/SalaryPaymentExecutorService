@@ -15,13 +15,12 @@ public class PaymentFileHandler {
 
     public static List<PaymentVO> createPaymentFile(String debtorDepositNumber, String creditorDepositNumberPrefix, int creditorCount) throws IOException {
         List<PaymentVO> paymentVOs = new ArrayList<>();
-//--------------------------------------------------------------------------
         //To Test Transaction Processor
         String input1 = "10000000";
         BigDecimal b = new BigDecimal(input1);
         BigDecimal a = PaymentTransactionApp.generateRandomAmount().add(b);
         paymentVOs.add(new PaymentVO(DEBTOR, debtorDepositNumber, a));
-//---------------------------------------------------------------------------
+        //To Test InadequateInitialBalanceException
         //  paymentVOs.add(new PaymentVO(DEBTOR, debtorDepositNumber, PaymentTransactionApp.generateRandomAmount()));
         for (int i = 1; i <= creditorCount; i++) {
             paymentVOs.add(new PaymentVO(CREDITOR, creditorDepositNumberPrefix + i, PaymentTransactionApp.generateRandomAmount()));
@@ -31,6 +30,7 @@ public class PaymentFileHandler {
         return paymentVOs;
 
     }
+
     public static void printPaymentVOsToConsole(List<PaymentVO> paymentVOs) {
         System.out.println("******************* PAYMENTS **********************");
         for (PaymentVO paymentVO : paymentVOs)

@@ -28,20 +28,11 @@ public class MyThreadPool implements Runnable {
 
     @Override
     public void run() {
-//-------------------------------------
-
-        File fileBalance = new File(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH);
-        File fileTransaction = new File(PaymentTransactionApp.TRANSACTION_FILE_PATH);
-        // file.writeFinalBalanceVOToFileThreadPool(balanceVOs);
-        System.out.println(this.getName());
         try {
             BalanceFileHandler.writeFinalBalanceVOToFile(balanceVOs);
-           // TransactionFileHandler.writeTransactionVOToFile(transactionVOS);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-//-------------------------------------
 
     }
 }
