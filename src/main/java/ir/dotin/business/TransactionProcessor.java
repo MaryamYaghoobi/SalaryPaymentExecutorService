@@ -2,10 +2,9 @@ package ir.dotin.business;
 
 import ir.dotin.exception.InadequateInitialBalanceException;
 import ir.dotin.exception.NoDepositFoundException;
-import ir.dotin.files.BalanceVO;
-import ir.dotin.files.PaymentVO;
-import ir.dotin.files.TransactionVO;
+import ir.dotin.files.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +13,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class TransactionProcessor {
-    public static List<TransactionVO> processThreadPool(List<BalanceVO> depositBalances, List<PaymentVO> paymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException {
+    public static List<TransactionVO> processThreadPool(List<BalanceVO> depositBalances, List<PaymentVO> paymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException, IOException {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
         List<TransactionVO> transactionVOs = new ArrayList<>();
+        BalanceFileHandler.createFinalBalanceFile(depositBalances);
+        TransactionFileHandler.createTransactionFile(transactionVOs,depositBalances);
         String debtorDepositNumber = getDebtorDepositNumber(paymentVOs);
         validationWithdrawals(depositBalances, paymentVOs, debtorDepositNumber);
         for (PaymentVO paymentVO : paymentVOs) {

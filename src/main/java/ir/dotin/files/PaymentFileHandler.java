@@ -26,7 +26,7 @@ public class PaymentFileHandler {
         for (int i = 1; i <= creditorCount; i++) {
             paymentVOs.add(new PaymentVO(CREDITOR, creditorDepositNumberPrefix + i, PaymentTransactionApp.generateRandomAmount()));
         }
-        writePaymentRecordsToFile(paymentVOs);
+        writePaymentVOsToFile(paymentVOs);
         printPaymentVOsToConsole(paymentVOs);
         return paymentVOs;
 
@@ -38,7 +38,7 @@ public class PaymentFileHandler {
         System.out.println("****************************************************");
     }
 
-    public static void writePaymentRecordsToFile(List<PaymentVO> paymentVOs) throws IOException {
+    public static void writePaymentVOsToFile(List<PaymentVO> paymentVOs) throws IOException {
         PrintWriter printWriter = new PrintWriter(PaymentTransactionApp.PAYMENT_FILE_PATH);
         for (PaymentVO paymentVO : paymentVOs) {
             printWriter.println(paymentVO.toString());

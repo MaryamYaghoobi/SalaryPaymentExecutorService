@@ -53,7 +53,6 @@ public class BalanceFileHandler {
     public static String createFinalBalanceFile(List<BalanceVO> depositBalances)
             throws IOException {
         String resultFinalBalance = "";
-
         Path pathBalanceUpdate = Paths.get(PaymentTransactionApp.FILE_PATH_PREFIX + "BalanceUpdate.txt");
         Files.createFile(pathBalanceUpdate);
         writeFinalBalanceVOToFile(balanceVOs);
@@ -62,7 +61,7 @@ public class BalanceFileHandler {
         return resultFinalBalance;
     }
 
-    public static  void writeFinalBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
+    public static synchronized void  writeFinalBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
         PrintWriter printWriter = new PrintWriter(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH);
         for (BalanceVO balanceVO : balanceVOs) {
             printWriter.println(balanceVO.toString());

@@ -19,6 +19,7 @@ public class PaymentTransactionApp {
     public static final String DEBTOR_DEPOSIT_NUMBER = "1.10.100.1";
     public static final String CREDITOR_DEPOSIT_NUMBER_PREFIX = "1.20.100.";
     public static List<BalanceVO> balanceVOs = new ArrayList<>();
+    public static List<TransactionVO> transactionVOS = new ArrayList<>();
     private static final int CREDITOR_COUNT = 1000;
     private static final int MIN_AMOUNT = 100;
     private static final int MAX_AMOUNT = 10000;

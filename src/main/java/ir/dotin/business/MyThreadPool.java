@@ -1,20 +1,18 @@
 package ir.dotin.business;
 
 import ir.dotin.PaymentTransactionApp;
-import ir.dotin.files.BalanceVO;
-import ir.dotin.files.PaymentVO;
-import ir.dotin.files.TransactionVO;
+import ir.dotin.files.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 
 import static ir.dotin.PaymentTransactionApp.balanceVOs;
-
+import static ir.dotin.PaymentTransactionApp.transactionVOS;
 
 public class MyThreadPool implements Runnable {
     private String name;
-    private TransactionVO[] transactionVOs;
 
     public String getName() {
         return name;
@@ -36,33 +34,15 @@ public class MyThreadPool implements Runnable {
         File fileTransaction = new File(PaymentTransactionApp.TRANSACTION_FILE_PATH);
         // file.writeFinalBalanceVOToFileThreadPool(balanceVOs);
         System.out.println(this.getName());
+        try {
+            BalanceFileHandler.writeFinalBalanceVOToFile(balanceVOs);
+            TransactionFileHandler.writeTransactionVOToFile(transactionVOS);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 //-------------------------------------
-        // public static synchronized void writeFinalBalanceVOToFileThreadPool(List < BalanceVO > balanceVOs){
-        synchronized (this) {
-            PrintWriter printWriter = null;
-            try {
-                printWriter = new PrintWriter(fileBalance);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            for (BalanceVO balanceVO : balanceVOs) {
-                printWriter.println(balanceVO.toString());
-            }
-            printWriter.close();
-        }
-        synchronized (this) {
-            PrintWriter printWriter = null;
-            try {
-                printWriter = new PrintWriter(fileTransaction);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            for (TransactionVO transactionVO : transactionVOs) {
-                printWriter.println(transactionVO.toString());
-            }
-            printWriter.close();
-        }
+
     }
 }
 
