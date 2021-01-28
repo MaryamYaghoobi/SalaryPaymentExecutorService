@@ -36,7 +36,7 @@ public class MyThreadPool implements Runnable {
         System.out.println(this.getName());
         try {
             BalanceFileHandler.writeFinalBalanceVOToFile(balanceVOs);
-            TransactionFileHandler.writeTransactionVOToFile(transactionVOS);
+           // TransactionFileHandler.writeTransactionVOToFile(transactionVOS);
         } catch (IOException e) {
             e.printStackTrace();
         }
