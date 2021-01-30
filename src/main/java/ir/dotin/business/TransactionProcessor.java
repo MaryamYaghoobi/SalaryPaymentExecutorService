@@ -15,18 +15,44 @@ import java.util.concurrent.TimeUnit;
 public class TransactionProcessor {
     public static List<TransactionVO> processThreadPool(List<BalanceVO> depositBalances, List<PaymentVO> paymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException, IOException {
         ExecutorService executorService = Executors.newFixedThreadPool(5);
+        List<PaymentVO> list = new ArrayList<>();
         List<TransactionVO> transactionVOs = new ArrayList<>();
+        List<PaymentVO> paymentVOs1 = list.subList(0, 200);
+        List<PaymentVO> paymentVOs2 = list.subList(201, 400);
+        List<PaymentVO> paymentVOs3 = list.subList(401, 600);
+        List<PaymentVO> paymentVOs4 = list.subList(601, 800);
+        List<PaymentVO> paymentVOs5 = list.subList(801, 1000);
+        list.add((PaymentVO) paymentVOs1);
+        list.add((PaymentVO) paymentVOs2);
+        list.add((PaymentVO) paymentVOs3);
+        list.add((PaymentVO) paymentVOs4);
+        list.add((PaymentVO) paymentVOs5);
+        //  List<TransactionVO> transactionVOs = new ArrayList<>();
         BalanceFileHandler.createFinalBalanceFile(depositBalances);
         String debtorDepositNumber = getDebtorDepositNumber(paymentVOs);
         validationWithdrawals(depositBalances, paymentVOs, debtorDepositNumber);
         for (PaymentVO paymentVO : paymentVOs) {
             if (DepositType.CREDITOR.equals(paymentVO.getType())) {
-                transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
-                MyThreadPool myThreadPool = new MyThreadPool(paymentVO);
+                //  transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
+                // MyThreadPool myThreadPool = new MyThreadPool(paymentVO);
+                MyThreadPool myThreadPool = new MyThreadPool(list);
+                /*
+                MyThreadPool myThreadPool1 = new MyThreadPool(paymentVOs1);
+                MyThreadPool myThreadPool2 = new MyThreadPool(paymentVOs2);
+                MyThreadPool myThreadPool3 = new MyThreadPool(paymentVOs3);
+                MyThreadPool myThreadPool4 = new MyThreadPool(paymentVOs4);
+                MyThreadPool myThreadPool5 = new MyThreadPool(paymentVOs5);*/
+               /* executorService.execute(myThreadPool1);
+                executorService.execute(myThreadPool2);
+                executorService.execute(myThreadPool3);
+                executorService.execute(myThreadPool4);
+                executorService.execute(myThreadPool5);*/
                 executorService.execute(myThreadPool);
             }
+            transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
         }
         executorService.awaitTermination(200L, TimeUnit.MICROSECONDS);
+
         return transactionVOs;
     }
 

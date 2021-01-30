@@ -1,18 +1,25 @@
 package ir.dotin.business;
 
-import ir.dotin.PaymentTransactionApp;
-import ir.dotin.files.*;
+import ir.dotin.files.BalanceFileHandler;
+import ir.dotin.files.PaymentVO;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
 
 import static ir.dotin.PaymentTransactionApp.balanceVOs;
-import static ir.dotin.PaymentTransactionApp.transactionVOS;
 
 public class MyThreadPool implements Runnable {
     private String name;
+
+    public List getList() {
+        return list;
+    }
+
+    public void setList(List list) {
+        this.list = list;
+    }
+
+    private List list;
 
     public String getName() {
         return name;
@@ -22,8 +29,8 @@ public class MyThreadPool implements Runnable {
         this.name = name;
     }
 
-    public MyThreadPool(PaymentVO name) {
-        this.name = String.valueOf(name);
+    public MyThreadPool(List<PaymentVO> list) {
+        this.list = list;
     }
 
     @Override
