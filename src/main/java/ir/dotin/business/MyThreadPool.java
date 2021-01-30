@@ -31,8 +31,8 @@ public class MyThreadPool implements Runnable {
         this.name = name;
     }
 
-    public MyThreadPool(List<PaymentVO> list) {
-        this.list = list;
+    public MyThreadPool(PaymentVO list) {
+        this.list = (List) list;
     }
 
     @Override

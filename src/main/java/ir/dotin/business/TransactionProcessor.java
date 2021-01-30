@@ -7,6 +7,7 @@ import ir.dotin.files.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,9 +42,9 @@ public class TransactionProcessor {
             for (PaymentVO paymentVO : group) {
                 if (DepositType.CREDITOR.equals(paymentVO.getType())) {
                    // MyThreadPool myThreadPool = new MyThreadPool(list);
-                    MyThreadPool myThreadPool = new MyThreadPool(group);
-                    executorService.execute(myThreadPool);
                     transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
+                    MyThreadPool myThreadPool = new MyThreadPool(paymentVO);
+                    executorService.execute(myThreadPool);
                 }
                 /*
                 MyThreadPool myThreadPool1 = new MyThreadPool(paymentVOs1);
