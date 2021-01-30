@@ -2,78 +2,51 @@ package ir.dotin.business;
 
 import ir.dotin.exception.InadequateInitialBalanceException;
 import ir.dotin.exception.NoDepositFoundException;
-import ir.dotin.files.*;
+import ir.dotin.files.BalanceFileHandler;
+import ir.dotin.files.BalanceVO;
+import ir.dotin.files.PaymentVO;
+import ir.dotin.files.TransactionVO;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static ir.dotin.PaymentTransactionApp.balanceVOs;
+
 public class TransactionProcessor {
 
-    public static List<TransactionVO> processThreadPool(List<BalanceVO> depositBalances, List<PaymentVO> paymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException, IOException,IndexOutOfBoundsException {
+    public static void processThreadPool(List<PaymentVO> allPaymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException, IOException, IndexOutOfBoundsException {
+        BalanceFileHandler.createFinalBalanceFile(balanceVOs);
+        String debtorDepositNumber = getDebtorDepositNumber(allPaymentVOs);
+        validationWithdrawals(balanceVOs, allPaymentVOs, debtorDepositNumber);
+        List<PaymentVO> paymentVOs = removeDebtorPaymentRecord(allPaymentVOs, debtorDepositNumber);
         ExecutorService executorService = Executors.newFixedThreadPool(5);
-        List<TransactionVO> transactionVOs = new ArrayList<>();
-        BalanceFileHandler.createFinalBalanceFile(depositBalances);
-        TransactionFileHandler.createTransactionFile(transactionVOs, depositBalances);
-       // List<PaymentVO> list = new ArrayList<>();
-//=================================
+        List<List<PaymentVO>> group = new ArrayList<>();
         for (int start = 0; start < paymentVOs.size(); start += 200) {
-            List<PaymentVO> group = paymentVOs.subList(start, start + 200);
-//=================================
-        /*
-        List<PaymentVO> paymentVOs1 = list.subList(0, 201);
-        List<PaymentVO> paymentVOs2 = list.subList(201, 401);
-        List<PaymentVO> paymentVOs3 = list.subList(401, 601);
-        List<PaymentVO> paymentVOs4 = list.subList(601, 801);
-        List<PaymentVO> paymentVOs5 = list.subList(801, 1002);
-        list.add((PaymentVO) paymentVOs1);
-        list.add((PaymentVO) paymentVOs2);
-        list.add((PaymentVO) paymentVOs3);
-        list.add((PaymentVO) paymentVOs4);
-        list.add((PaymentVO) paymentVOs5);*/
-           // BalanceFileHandler.createFinalBalanceFile(depositBalances);
-           // TransactionFileHandler.createTransactionFile(transactionVOs, depositBalances);
-            String debtorDepositNumber = getDebtorDepositNumber(group);
-            validationWithdrawals(depositBalances, group, debtorDepositNumber);
-           for (PaymentVO paymentVO : group) {
-               if (DepositType.CREDITOR.equals(paymentVO.getType())) {
-                   MyThreadPool myThreadPool = new MyThreadPool(paymentVO);
-                   executorService.execute(myThreadPool);
-                   // MyThreadPool myThreadPool = new MyThreadPool(list);
-                   transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
-
-               }
-
-           }
-                /*
-                MyThreadPool myThreadPool1 = new MyThreadPool(paymentVOs1);
-                MyThreadPool myThreadPool2 = new MyThreadPool(paymentVOs2);
-                MyThreadPool myThreadPool3 = new MyThreadPool(paymentVOs3);
-                MyThreadPool myThreadPool4 = new MyThreadPool(paymentVOs4);
-                MyThreadPool myThreadPool5 = new MyThreadPool(paymentVOs5);*/
-               /* executorService.execute(myThreadPool1);
-                executorService.execute(myThreadPool2);
-                executorService.execute(myThreadPool3);
-                executorService.execute(myThreadPool4);
-                executorService.execute(myThreadPool5);*/
-                // executorService.execute(new MyThreadPool(Collections.singletonList(paymentVO)));
-                //  executorService.execute(myThreadPool);
-                // transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
-
-           // }
-            executorService.shutdown();
-
-            executorService.awaitTermination(200L, TimeUnit.MICROSECONDS);
-
-          //  return transactionVOs;
+            group.add(paymentVOs.subList(start, start + 200));
         }
-        return transactionVOs;
+        for (List<PaymentVO> paymentVOList : group) {
+            MyThreadPool myThreadPool = new MyThreadPool(debtorDepositNumber, paymentVOList);
+            executorService.execute(myThreadPool);
+        }
+        executorService.shutdown();
+        executorService.awaitTermination(5L, TimeUnit.SECONDS);
     }
+
+    private static List<PaymentVO> removeDebtorPaymentRecord(List<PaymentVO> paymentVOs, String debtorDepositNumber) {
+        List<PaymentVO> resultPaymentVOs = new ArrayList<>();
+        for (PaymentVO paymentVO : paymentVOs) {
+            if (!debtorDepositNumber.equals(paymentVO.getDepositNumber())) {
+                resultPaymentVOs.add(paymentVO);
+            }
+        }
+        return resultPaymentVOs;
+    }
+
 
     public static String getDebtorDepositNumber(List<PaymentVO> paymentVOs) throws NoDepositFoundException {
         for (PaymentVO paymentVO : paymentVOs) {
@@ -108,7 +81,7 @@ public class TransactionProcessor {
         return totalCreditorAmount;
     }
 
-    private static TransactionVO processPayment(List<BalanceVO> depositBalances, String debtorDepositNumber, PaymentVO creditorPaymentVO) {
+    public static TransactionVO processPayment(List<BalanceVO> depositBalances, String debtorDepositNumber, PaymentVO creditorPaymentVO) {
 
         TransactionVO transactionVO = new TransactionVO();
         transactionVO.setDebtorDepositNumber(debtorDepositNumber);
@@ -127,11 +100,4 @@ public class TransactionProcessor {
         return transactionVO;
     }
 }
-
-
-
-
-
-
-
 
