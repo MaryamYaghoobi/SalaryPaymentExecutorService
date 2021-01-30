@@ -20,12 +20,13 @@ public class TransactionProcessor {
         List<TransactionVO> transactionVOs = new ArrayList<>();
         BalanceFileHandler.createFinalBalanceFile(depositBalances);
         TransactionFileHandler.createTransactionFile(transactionVOs, depositBalances);
-        List<PaymentVO> list = new ArrayList<>();
+       // List<PaymentVO> list = new ArrayList<>();
 //=================================
-        for (int start = 0; start < list.size(); start += 200) {
-            List<PaymentVO> group = list.subList(start, start + 200);
+        for (int start = 0; start < paymentVOs.size(); start += 200) {
+            List<PaymentVO> group = paymentVOs.subList(start, start + 200);
 //=================================
-        /*List<PaymentVO> paymentVOs1 = list.subList(0, 201);
+        /*
+        List<PaymentVO> paymentVOs1 = list.subList(0, 201);
         List<PaymentVO> paymentVOs2 = list.subList(201, 401);
         List<PaymentVO> paymentVOs3 = list.subList(401, 601);
         List<PaymentVO> paymentVOs4 = list.subList(601, 801);
@@ -39,13 +40,16 @@ public class TransactionProcessor {
            // TransactionFileHandler.createTransactionFile(transactionVOs, depositBalances);
             String debtorDepositNumber = getDebtorDepositNumber(group);
             validationWithdrawals(depositBalances, group, debtorDepositNumber);
-            for (PaymentVO paymentVO : group) {
-                if (DepositType.CREDITOR.equals(paymentVO.getType())) {
+           for (PaymentVO paymentVO : group) {
+               if (DepositType.CREDITOR.equals(paymentVO.getType())) {
+                   MyThreadPool myThreadPool = new MyThreadPool(paymentVO);
+                   executorService.execute(myThreadPool);
                    // MyThreadPool myThreadPool = new MyThreadPool(list);
-                    transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
-                    MyThreadPool myThreadPool = new MyThreadPool(paymentVO);
-                    executorService.execute(myThreadPool);
-                }
+                   transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
+
+               }
+
+           }
                 /*
                 MyThreadPool myThreadPool1 = new MyThreadPool(paymentVOs1);
                 MyThreadPool myThreadPool2 = new MyThreadPool(paymentVOs2);
@@ -61,7 +65,7 @@ public class TransactionProcessor {
                 //  executorService.execute(myThreadPool);
                 // transactionVOs.add(processPayment(depositBalances, debtorDepositNumber, paymentVO));
 
-            }
+           // }
             executorService.shutdown();
 
             executorService.awaitTermination(200L, TimeUnit.MICROSECONDS);
