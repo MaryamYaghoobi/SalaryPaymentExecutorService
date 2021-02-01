@@ -1,6 +1,5 @@
 package ir.dotin.business;
 
-import ir.dotin.files.BalanceFileHandler;
 import ir.dotin.files.PaymentVO;
 
 import java.io.IOException;
@@ -22,12 +21,11 @@ public class MyThreadPool implements Runnable {
     @Override
     public void run() {
         for (PaymentVO paymentVO : list) {
-            transactionVOS.add(TransactionProcessor.processPayment(balanceVOs, debtorDepositNumber, paymentVO));
-        }
-        try {
-            BalanceFileHandler.writeFinalBalanceVOToFile(balanceVOs);
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                transactionVOS.add(TransactionProcessor.processPayment(balanceVOs, debtorDepositNumber, paymentVO));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }

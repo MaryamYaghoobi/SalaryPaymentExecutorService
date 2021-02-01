@@ -10,6 +10,7 @@ import ir.dotin.files.TransactionVO;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,7 +21,6 @@ import static ir.dotin.PaymentTransactionApp.balanceVOs;
 public class TransactionProcessor {
 
     public static void processThreadPool(List<PaymentVO> allPaymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException, IOException, IndexOutOfBoundsException {
-        BalanceFileHandler.createFinalBalanceFile(balanceVOs);
         String debtorDepositNumber = getDebtorDepositNumber(allPaymentVOs);
         validationWithdrawals(balanceVOs, allPaymentVOs, debtorDepositNumber);
         List<PaymentVO> paymentVOs = removeDebtorPaymentRecord(allPaymentVOs, debtorDepositNumber);
@@ -30,8 +30,10 @@ public class TransactionProcessor {
             group.add(paymentVOs.subList(start, start + 200));
         }
         for (List<PaymentVO> paymentVOList : group) {
+
             MyThreadPool myThreadPool = new MyThreadPool(debtorDepositNumber, paymentVOList);
             executorService.execute(myThreadPool);
+
         }
         executorService.shutdown();
         executorService.awaitTermination(5L, TimeUnit.SECONDS);
@@ -81,23 +83,33 @@ public class TransactionProcessor {
         return totalCreditorAmount;
     }
 
-    public static TransactionVO processPayment(List<BalanceVO> depositBalances, String debtorDepositNumber, PaymentVO creditorPaymentVO) {
-
+    public static TransactionVO processPayment(List<BalanceVO> depositBalances, String debtorDepositNumber, PaymentVO creditorPaymentVO) throws IOException {
         TransactionVO transactionVO = new TransactionVO();
         transactionVO.setDebtorDepositNumber(debtorDepositNumber);
         transactionVO.setCreditorDepositNumber(creditorPaymentVO.getDepositNumber());
         transactionVO.setAmount(creditorPaymentVO.getAmount());
         for (BalanceVO balanceVO : depositBalances) {
-            if (balanceVO.getDepositNumber().equals(creditorPaymentVO.getDepositNumber())) {//Creditor
+            if (balanceVO.getDepositNumber().equals(creditorPaymentVO.getDepositNumber())) {
                 balanceVO.setAmount(balanceVO.getAmount().add(creditorPaymentVO.getAmount()));
+                finalBalanceFile(Collections.singletonList(balanceVO));
                 transactionVO.setAmount(balanceVO.getAmount());
-            } else if (balanceVO.getDepositNumber().equals(debtorDepositNumber)) {//Debtor
+            } else if (balanceVO.getDepositNumber().equals(debtorDepositNumber)) {
                 balanceVO.setAmount(balanceVO.getAmount().subtract(creditorPaymentVO.getAmount()));
+                finalBalanceFile(Collections.singletonList(balanceVO));
                 transactionVO.setAmount(balanceVO.getAmount());
             }
         }
-
         return transactionVO;
     }
+
+    public static void finalBalanceFile(List<BalanceVO> depositBalances) throws IOException {
+        BalanceFileHandler.createFinalBalanceFile(depositBalances);
+        BalanceFileHandler.writeFinalBalanceVOToFile(depositBalances);
+        BalanceFileHandler.printFinalBalanceVOsToConsole(depositBalances);
+    }
 }
+
+
+
+
 
