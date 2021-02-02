@@ -5,6 +5,8 @@ import ir.dotin.files.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -31,12 +33,12 @@ public class PaymentTransactionApp {
     }
 
     public static void main(String[] args) {
-
         try {
             List<PaymentVO> paymentVOs = PaymentFileHandler.createPaymentFile(DEBTOR_DEPOSIT_NUMBER, CREDITOR_DEPOSIT_NUMBER_PREFIX, CREDITOR_COUNT);
             List<BalanceVO> depositBalances = BalanceFileHandler.createInitialBalanceFile(balanceVOs);
+           // Files.copy(Paths.get(BALANCE_FILE_PATH),Paths.get(BALANCE_UPDATE_FILE_PATH));
+            BalanceFileHandler.createFinalBalanceFile(depositBalances);
             TransactionProcessor.processThreadPool(paymentVOs);
-           // BalanceFileHandler.createFinalBalanceFile(depositBalances);
             TransactionFileHandler.createTransactionFile(transactionVOS, depositBalances);
         } catch (IOException ioException) {
 

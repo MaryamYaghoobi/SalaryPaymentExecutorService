@@ -26,7 +26,7 @@ public class BalanceFileHandler {
             balanceVOs.add(new BalanceVO(PaymentTransactionApp.CREDITOR_DEPOSIT_NUMBER_PREFIX + i, PaymentTransactionApp.generateRandomAmount()));
         }
         writeBalanceVOToFile(balanceVOs);
-        printBalanceVOsToConsole(balanceVOs);
+        //printBalanceVOsToConsole(balanceVOs);
         return balanceVOs;
     }
 
@@ -45,17 +45,15 @@ public class BalanceFileHandler {
             System.out.println(balanceVO.toString());
         System.out.println("***********************************************************");
     }
-
-
-    public static String createFinalBalanceFile(List<BalanceVO> depositBalances)
+    public static void createFinalBalanceFile(List<BalanceVO> depositBalances)
             throws IOException {
-        String resultFinalBalance = "";
+       // String resultFinalBalance = "";
         Path pathBalanceUpdate = Paths.get(PaymentTransactionApp.FILE_PATH_PREFIX + "BalanceUpdate.txt");
         if (!Files.exists(pathBalanceUpdate)) {
             Files.createFile(pathBalanceUpdate);
         }
-        resultFinalBalance += PaymentTransactionApp.DEBTOR_DEPOSIT_NUMBER + "\t" + PaymentTransactionApp.CREDITOR_DEPOSIT_NUMBER_PREFIX + "\t" + depositBalances + "\n";
-        return resultFinalBalance;
+      //  resultFinalBalance += PaymentTransactionApp.DEBTOR_DEPOSIT_NUMBER + "\t" + PaymentTransactionApp.CREDITOR_DEPOSIT_NUMBER_PREFIX + "\t" + depositBalances + "\n";
+      //  return resultFinalBalance;
     }
 
     public static synchronized void writeFinalBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
@@ -77,8 +75,6 @@ public class BalanceFileHandler {
 
 
 }
-
-
 
 
 
