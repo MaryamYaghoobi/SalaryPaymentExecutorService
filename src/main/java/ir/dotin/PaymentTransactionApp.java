@@ -36,6 +36,7 @@ public class PaymentTransactionApp {
             List<PaymentVO> paymentVOs = PaymentFileHandler.createPaymentFile(DEBTOR_DEPOSIT_NUMBER, CREDITOR_DEPOSIT_NUMBER_PREFIX, CREDITOR_COUNT);
             List<BalanceVO> depositBalances = BalanceFileHandler.createInitialBalanceFile(balanceVOs);
             TransactionProcessor.processThreadPool(paymentVOs);
+           // BalanceFileHandler.createFinalBalanceFile(depositBalances);
             TransactionFileHandler.createTransactionFile(transactionVOS, depositBalances);
         } catch (IOException ioException) {
 

@@ -13,12 +13,17 @@ public class BalanceVO implements Serializable {
         this.amount = amount;
     }
 
+    public BalanceVO() {
+
+    }
+
     public String getDepositNumber() {
         return depositNumber;
     }
 
-    public void setDepositNumber(String depositNumber) {
+    public String setDepositNumber(String depositNumber) {
         this.depositNumber = depositNumber;
+        return depositNumber;
     }
 
     public BigDecimal getAmount() {
