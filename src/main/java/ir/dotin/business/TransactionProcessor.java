@@ -3,7 +3,6 @@ package ir.dotin.business;
 import ir.dotin.PaymentTransactionApp;
 import ir.dotin.exception.InadequateInitialBalanceException;
 import ir.dotin.exception.NoDepositFoundException;
-import ir.dotin.files.BalanceFileHandler;
 import ir.dotin.files.BalanceVO;
 import ir.dotin.files.PaymentVO;
 import ir.dotin.files.TransactionVO;
@@ -14,16 +13,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ir.dotin.PaymentTransactionApp.balanceVOs;
 
 public class TransactionProcessor {
+    private static AtomicInteger count = new AtomicInteger(1);
+
     public static void processThreadPool(List<PaymentVO> allPaymentVOs) throws InterruptedException, NoDepositFoundException, InadequateInitialBalanceException, IOException, IndexOutOfBoundsException {
+        System.out.println("Processing thread pool...");
+        //  Files.createFile(Paths.get(PaymentTransactionApp.TRANSACTION_FILE_PATH));
         String debtorDepositNumber = getDebtorDepositNumber(allPaymentVOs);
         validationWithdrawals(balanceVOs, allPaymentVOs, debtorDepositNumber);
         List<PaymentVO> paymentVOs = removeDebtorPaymentRecord(allPaymentVOs, debtorDepositNumber);
@@ -87,7 +90,10 @@ public class TransactionProcessor {
     }
 
 
-    public static TransactionVO processPayment(List<BalanceVO> depositBalances, String debtorDepositNumber, PaymentVO creditorPaymentVO) throws IOException {
+    public static TransactionVO processPayment(List<BalanceVO> depositBalances, String debtorDepositNumber, PaymentVO creditorPaymentVO) throws Exception {
+        System.out.println(String.format("Processing payment number %s from %s to %s amount = %s",
+                count.getAndIncrement(), debtorDepositNumber, creditorPaymentVO.getDepositNumber(), creditorPaymentVO.getAmount()));
+
         TransactionVO transactionVO = new TransactionVO();
         transactionVO.setDebtorDepositNumber(debtorDepositNumber);
         transactionVO.setCreditorDepositNumber(creditorPaymentVO.getDepositNumber());
@@ -97,30 +103,40 @@ public class TransactionProcessor {
                 balanceVO.setAmount(balanceVO.getAmount().add(creditorPaymentVO.getAmount()));
                 updateBalanceFileRecord(creditorPaymentVO.getDepositNumber(), creditorPaymentVO.getAmount());
                 transactionVO.setAmount(balanceVO.getAmount());
+           /* } else if (balanceVO.getDepositNumber().equals(debtorDepositNumber)) {
+                balanceVO.setDepositNumber(balanceVO.getDepositNumber());
+                balanceVO.setAmount(transactionVO.getAmount());
+            }*/
             }
         }
+        //  BalanceFileHandler.createFinalBalanceFile(depositBalances);
+
         updateBalanceFileRecord(debtorDepositNumber, creditorPaymentVO.getAmount().negate());
+        //  Files.copy(Paths.get(BALANCE_FILE_PATH),Paths.get(BALANCE_UPDATE_FILE_PATH));
         return transactionVO;
     }
 
     public static synchronized void updateBalanceFileRecord(String depositNumber, BigDecimal amountChange) {
         System.out.println("updateBalanceFileRecord, depositNumber = " + depositNumber + ", amountChange = " + amountChange.toString());
         try {
-            BufferedReader file = new BufferedReader(new FileReader(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH));
-            StringBuffer inputBuffer = new StringBuffer();
-            String line;
-            while ((line = file.readLine()) != null) {
-                if (line.contains(depositNumber + "\t")) {
-                    line = depositNumber + "\t" + new BigDecimal(line.split(depositNumber)[1].trim()).add(amountChange);
+            StringBuffer inputBuffer;
+            try (BufferedReader file = new BufferedReader(new FileReader(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH))) {
+                inputBuffer = new StringBuffer();
+                String line;
+                while ((line = file.readLine()) != null) {
+                    if (line.contains(depositNumber + "\t")) {
+                        line = depositNumber + "\t" + new BigDecimal(line.split(depositNumber)[1].trim()).add(amountChange);
+                    }
+                    inputBuffer.append(line);
+                    inputBuffer.append("\r\n");
                 }
-                inputBuffer.append(line);
-                inputBuffer.append("\r\n");
+                file.close();
             }
-            file.close();
 
-            FileOutputStream fileOut = new FileOutputStream(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH,true);
-            fileOut.write( inputBuffer.toString().getBytes());
+            FileOutputStream fileOut = new FileOutputStream(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH, true);
+            fileOut.write(inputBuffer.toString().getBytes());
             fileOut.close();
+
         } catch (Exception e) {
             System.out.println("Problem reading file.");
             e.printStackTrace();

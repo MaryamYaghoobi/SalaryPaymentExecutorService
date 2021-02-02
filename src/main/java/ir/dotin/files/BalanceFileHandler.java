@@ -27,6 +27,7 @@ public class BalanceFileHandler {
         }
         writeBalanceVOToFile(balanceVOs);
         //printBalanceVOsToConsole(balanceVOs);
+        // Files.copy(Paths.get(PaymentTransactionApp.BALANCE_FILE_PATH),Paths.get(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH));
         return balanceVOs;
     }
 
@@ -45,15 +46,17 @@ public class BalanceFileHandler {
             System.out.println(balanceVO.toString());
         System.out.println("***********************************************************");
     }
+
     public static void createFinalBalanceFile(List<BalanceVO> depositBalances)
             throws IOException {
-       // String resultFinalBalance = "";
+        // String resultFinalBalance = "";
         Path pathBalanceUpdate = Paths.get(PaymentTransactionApp.FILE_PATH_PREFIX + "BalanceUpdate.txt");
         if (!Files.exists(pathBalanceUpdate)) {
             Files.createFile(pathBalanceUpdate);
         }
-      //  resultFinalBalance += PaymentTransactionApp.DEBTOR_DEPOSIT_NUMBER + "\t" + PaymentTransactionApp.CREDITOR_DEPOSIT_NUMBER_PREFIX + "\t" + depositBalances + "\n";
-      //  return resultFinalBalance;
+
+        //  resultFinalBalance += PaymentTransactionApp.DEBTOR_DEPOSIT_NUMBER + "\t" + PaymentTransactionApp.CREDITOR_DEPOSIT_NUMBER_PREFIX + "\t" + depositBalances + "\n";
+        //  return resultFinalBalance;
     }
 
     public static synchronized void writeFinalBalanceVOToFile(List<BalanceVO> balanceVOs) throws IOException {
@@ -65,15 +68,12 @@ public class BalanceFileHandler {
         printWriter.close();
     }
 
-
     public static void printFinalBalanceVOsToConsole(List<BalanceVO> balanceVOS) {
         System.out.println("*********************** FinalBALANCE **********************");
         for (BalanceVO balanceVO : balanceVOS)
             System.out.println(balanceVO.toString());
         System.out.println("***********************************************************");
     }
-
-
 }
 
 

@@ -34,10 +34,12 @@ public class PaymentTransactionApp {
 
     public static void main(String[] args) {
         try {
+            System.out.println("Starting app...");
+            deleteAllExistingFiles();
             List<PaymentVO> paymentVOs = PaymentFileHandler.createPaymentFile(DEBTOR_DEPOSIT_NUMBER, CREDITOR_DEPOSIT_NUMBER_PREFIX, CREDITOR_COUNT);
             List<BalanceVO> depositBalances = BalanceFileHandler.createInitialBalanceFile(balanceVOs);
-           // Files.copy(Paths.get(BALANCE_FILE_PATH),Paths.get(BALANCE_UPDATE_FILE_PATH));
-            BalanceFileHandler.createFinalBalanceFile(depositBalances);
+            // BalanceFileHandler.createFinalBalanceFile(depositBalances);
+            // Files.copy(Paths.get(BALANCE_FILE_PATH),Paths.get(BALANCE_UPDATE_FILE_PATH));
             TransactionProcessor.processThreadPool(paymentVOs);
             TransactionFileHandler.createTransactionFile(transactionVOS, depositBalances);
         } catch (IOException ioException) {
@@ -47,6 +49,15 @@ public class PaymentTransactionApp {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    private static void deleteAllExistingFiles() throws IOException {
+        System.out.println("Deleting all existing files...");
+        Files.deleteIfExists(Paths.get(PaymentTransactionApp.BALANCE_FILE_PATH));
+        Files.deleteIfExists(Paths.get(PaymentTransactionApp.BALANCE_UPDATE_FILE_PATH));
+        Files.deleteIfExists(Paths.get(PaymentTransactionApp.PAYMENT_FILE_PATH));
+        Files.deleteIfExists(Paths.get(PaymentTransactionApp.TRANSACTION_FILE_PATH));
     }
 }
+
+
