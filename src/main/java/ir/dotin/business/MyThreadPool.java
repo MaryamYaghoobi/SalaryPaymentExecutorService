@@ -1,11 +1,10 @@
 package ir.dotin.business;
 
 import ir.dotin.files.PaymentVO;
+import ir.dotin.files.TransactionFileHandler;
 
+import java.io.IOException;
 import java.util.List;
-
-import static ir.dotin.PaymentTransactionApp.balanceVOs;
-import static ir.dotin.PaymentTransactionApp.transactionVOS;
 
 
 public class MyThreadPool implements Runnable {
@@ -21,11 +20,11 @@ public class MyThreadPool implements Runnable {
     public void run() {
         for (PaymentVO paymentVO : list) {
             try {
-                transactionVOS.add(TransactionProcessor.processPayment(balanceVOs, debtorDepositNumber, paymentVO));
-            } catch (Exception e) {
+                TransactionFileHandler.addTransactionToFile(TransactionProcessor.processPayment(debtorDepositNumber, paymentVO));
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
     }
+
 }

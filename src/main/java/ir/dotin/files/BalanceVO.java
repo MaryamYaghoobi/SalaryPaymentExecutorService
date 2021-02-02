@@ -13,10 +13,6 @@ public class BalanceVO implements Serializable {
         this.amount = amount;
     }
 
-    public BalanceVO() {
-
-    }
-
     public String getDepositNumber() {
         return depositNumber;
     }
